@@ -1,360 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>River Watch — Flood Response Decision Support</title>
-  <style>
-    :root {
-      --bg: #f4f7fa; --card: #ffffff; --ink: #172334; --muted: #5b6b80;
-      --border: #dce3ec; --accent: #0f4c81;
-      --norm-bg: #e7f6ec; --norm-fg: #146c38;
-      --stby-bg: #fff4db; --stby-fg: #9a5b00;
-      --barr-bg: #fde8e8; --barr-fg: #a61b1b;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.45; }
-    header { background: var(--accent); color: #fff; padding: 1rem 1.25rem; }
-    header h1 { margin: 0; font-size: 1.35rem; }
-    header p { margin: 0.25rem 0 0; font-size: 0.9rem; opacity: 0.9; }
-    .container { max-width: 1240px; margin: 1rem auto; padding: 0 1rem 2rem; }
-    .bar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    button { cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--ink); padding: 0.5rem 0.85rem; border-radius: 6px; font-weight: 600; font-size: 0.86rem; }
-    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
-    .card h2 { margin: 0 0 0.7rem; font-size: 1.08rem; }
-    .banner { padding: 0.65rem 0.9rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 1rem; border: 1px solid; }
-    .banner.warn { background: #fff7e0; border-color: #f0c36d; color: #704700; }
-    .banner.info { background: #e8f1fb; border-color: #b4d2f2; color: #124375; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.85rem; margin-bottom: 1rem; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
-    th, td { text-align: left; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-    th { background: #f8fafc; font-weight: 700; color: var(--muted); white-space: nowrap; }
-    .pill { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; }
-    .pill.Normal { background: var(--norm-bg); color: var(--norm-fg); }
-    .pill.Standby { background: var(--stby-bg); color: var(--stby-fg); }
-    .pill.Barriers { background: var(--barr-bg); color: var(--barr-fg); }
-    .tag { display: inline-block; font-size: 0.74rem; padding: 0.1rem 0.45rem; border-radius: 4px; background: #eef2f6; color: #334155; margin: 0.1rem 0.2rem 0 0; }
-    .tag.reh { background: #fde68a; color: #78350f; font-weight: 700; }
-    .tag.flag { background: #fecaca; color: #7f1d1d; font-weight: 700; }
-    .chat-box { max-height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; background: #fafbfd; margin-bottom: 0.75rem; }
-    .msg { margin-bottom: 0.75rem; padding: 0.65rem 0.8rem; border-radius: 6px; white-space: pre-wrap; font-size: 0.91rem; }
-    .msg.user { background: #e8f1fb; margin-left: 12%; }
-    .msg.assistant { background: #ffffff; border: 1px solid var(--border); margin-right: 6%; }
-    .chat-form { display: flex; gap: 0.5rem; }
-    .chat-form input { flex: 1; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
-    .quick-qs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
-    .quick-qs button { font-size: 0.8rem; padding: 0.32rem 0.6rem; background: #f8fafc; }
-    .hidden { display: none; }
-    .disclaimer { font-size: 0.84rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 1rem; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>River Watch</title>
+<style>
+:root{--bg:#0b1b2b;--card:#ffffff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--teal:#0ea5a4;--ok:#16a34a;--stand:#f59e0b;--bar:#dc2626;--off:#94a3b8;--radius:16px}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#eef3f8;color:var(--ink);padding-bottom:env(safe-area-inset-bottom,0)}
+.hero{background:linear-gradient(135deg,var(--bg),#13476b 70%,#0e7490);color:#fff;padding:calc(18px + env(safe-area-inset-top,0)) 16px 56px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:flex-start}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:26px}
+h1{margin:0;font-size:22px}
+.hero p{margin:2px 0 0;opacity:.8;font-size:13px}
+.fetched{font-size:12px;background:rgba(255,255,255,.14);padding:6px 10px;border-radius:99px}
+main{max-width:1100px;margin:-40px auto 40px;padding:0 12px;display:grid;gap:14px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 22px rgba(15,23,42,.09);padding:14px;min-width:0}
+.card h2{margin:0 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.8px;color:var(--mute)}
+.rule{font-size:13px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:12px;padding:10px 12px;color:#155e75}
+label{font-size:12px;color:var(--mute);display:block;margin-bottom:3px}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{resize:vertical;min-height:56px}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;min-height:44px;background:var(--teal);color:#fff;cursor:pointer}
+button.ghost{background:#e2e8f0;color:#0f172a}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hint{font-size:12px;color:var(--mute)}
+.hint.err{color:var(--bar)}
+#chat{display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto;margin-bottom:10px}
+.b{padding:10px 12px;border-radius:14px;max-width:96%;word-wrap:break-word;overflow-wrap:anywhere}
+.b.user{align-self:flex-end;background:var(--teal);color:#fff;border-bottom-right-radius:4px}
+.b.bot{align-self:flex-start;background:#f1f5f9;border-bottom-left-radius:4px}
+.b.err{align-self:stretch;max-width:100%;background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+.b.note{align-self:stretch;max-width:100%;background:#fffbeb;border:1px solid #fde68a;color:#78350f}
+.b pre,.errlist pre{white-space:pre-wrap;word-break:break-word;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;margin:6px 0 0}
+.stamp{font-size:11px;color:var(--mute);margin-top:6px}
+.dots span{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:#64748b;animation:bl 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.ask{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:4px 10px;border-radius:99px;background:#e2e8f0}
+.chip.good{background:#dcfce7;color:#14532d}.chip.bad{background:#fee2e2;color:#7f1d1d}.chip.warn{background:#fef3c7;color:#78350f}
+button.ex{font-size:13px;font-weight:500;padding:6px 12px;min-height:36px;border-radius:99px;background:#f0fdfa;color:#115e59;border:1px solid #99f6e4}
+.grid3{display:grid;gap:12px}
+.panel{border-radius:var(--radius);padding:14px;color:#fff}
+.panel h3{margin:0 0 2px;font-size:16px}.panel .sub{font-size:12px;opacity:.85;margin-bottom:10px}
+.panel.p1{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.panel.p2{background:linear-gradient(135deg,#991b1b,#ef4444)}
+.panel.p3{background:linear-gradient(135deg,#0c4a6e,#0ea5a4)}
+.big{font-size:38px;font-weight:800;line-height:1}
+.panel .tw{background:rgba(255,255,255,.16);border-radius:12px;padding:9px 10px;margin-top:8px}
+.panel .tw b{display:block}.panel .tw small{opacity:.95;display:block}
+.empty{opacity:.85;font-style:italic;margin-top:8px}
+.tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:99px;margin:2px 3px 0 0}
+.tag.dark{background:#e2e8f0;color:#334155}.tag.rh{background:#7c3aed;color:#fff}
+.tag.yel{background:#fef3c7;color:#78350f}.tag.org{background:#fed7aa;color:#7c2d12}.tag.redw{background:#fecaca;color:#7f1d1d}
+.towns{display:grid;gap:10px}
+.town{border:1px solid var(--line);border-left:6px solid var(--off);border-radius:12px;padding:10px 12px;min-width:0}
+.town.l0{border-left-color:var(--ok)}.town.l1{border-left-color:var(--stand)}.town.l2{border-left-color:var(--bar)}
+.town h4{margin:0;display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.town .lv{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;color:#fff;background:var(--off);white-space:nowrap;align-self:center}
+.lv.l0{background:var(--ok)}.lv.l1{background:var(--stand)}.lv.l2{background:var(--bar)}
+.meta{font-size:12px;color:var(--mute)}
+.gauge{position:relative;height:12px;background:#e2e8f0;border-radius:99px;margin:14px 0 18px}
+.gauge .fill{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--ok)}
+.gauge .fill.l1{background:var(--stand)}.gauge .fill.l2{background:var(--bar)}
+.gauge .m{position:absolute;top:-3px;bottom:-3px;width:2px;background:#334155}
+.gauge .m u{position:absolute;top:17px;left:-14px;font-size:10px;text-decoration:none;color:#475569}
+.gauge.off{background:repeating-linear-gradient(45deg,#e2e8f0,#e2e8f0 6px,#f1f5f9 6px,#f1f5f9 12px);text-align:center;font-size:10px;color:#64748b;line-height:12px}
+.reasons{font-size:12px;color:#7f1d1d;background:#fef2f2;border-radius:8px;padding:6px 8px;margin-top:6px}
+.flags{font-size:12px;color:#78350f;margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:11px;text-transform:uppercase;color:var(--mute)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll table{min-width:520px}
+.callout{background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.errlist .e{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:8px 10px;margin-bottom:8px;color:#7f1d1d;font-size:13px}
+.log li{margin-bottom:6px;font-size:13px}
+.rg th.y{background:#fef9c3;color:#713f12}.rg th.o{background:#fed7aa;color:#7c2d12}.rg th.r{background:#fecaca;color:#7f1d1d}
+.disc{font-size:12px;color:#475569;margin-top:6px}
+@media(min-width:760px){.grid3{grid-template-columns:repeat(3,1fr)}.towns{grid-template-columns:repeat(2,1fr)}.hero{padding:calc(24px + env(safe-area-inset-top,0)) 28px 64px}}
+@media(min-width:1000px){.towns{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:480px){.ask{grid-template-columns:1fr}.ask button{width:100%}}
+</style>
 </head>
 <body>
-  <header>
-    <h1>River Watch — Eight-Town Flood Response Dashboard</h1>
-    <p>Live Google Sheet · Open-Meteo GloFAS Forecast &amp; 10-Yr History · OPW Station Network · Met Éireann Warnings · Gemini 3.5 Flash-Lite</p>
-  </header>
+<header class="hero">
+  <div class="brand"><div class="logo">≈</div><div><h1>River Watch</h1><p>Flood response advice shared by eight county councils</p></div></div>
+  <div class="fetched" id="fetched">No data fetched yet</div>
+</header>
 
-  <div class="container">
-    <div class="bar">
-      <div style="font-size:0.88rem;color:var(--muted);">
-        All panels update live from your Team Sheet &amp; public feeds.
-      </div>
-      <div class="actions">
-        <button id="refreshBtn" class="primary" onclick="loadLiveState(false)">Refresh Live Data</button>
-        <button onclick="downloadHistoryJson()">Download history_summary.json</button>
-        <button onclick="loadLiveState(true)">Rebuild 10-Yr Cache</button>
-      </div>
-    </div>
+<main>
+  <div class="rule"><strong>River Watch recommends; it never sends a crew.</strong> The Duty Officer records the decision and the reason (decision record at the bottom).</div>
 
-    <div id="statusBanner" class="banner info">Loading live Google Sheet, river forecasts, and Met Éireann warnings…</div>
-    <div id="rehearsalBanner" class="banner warn hidden"></div>
-
-    <!-- 1. AI ASSISTANT -->
-    <div class="card">
-      <h2>1. Duty Officer &amp; Area Manager AI Assistant</h2>
-      <div class="quick-qs">
-        <button onclick="askQuick(&quot;What is tonight's plan?&quot;)">What is tonight's plan?</button>
-        <button onclick="askQuick('Why is Fermoy at that level?')">Why is Fermoy at that level?</button>
-        <button onclick="askQuick('What if the Suir at Clonmel reaches 150 m3/s?')">What if Suir at Clonmel reaches 150 m³/s?</button>
-        <button onclick="askQuick('Which town should be first in line for a flood-defence study?')">First in line for study?</button>
-        <button onclick="askQuick('Will my house in Mallow flood tonight?')">Will my house in Mallow flood?</button>
-      </div>
-      <div id="chatBox" class="chat-box">
-        <div class="msg assistant">Ask about tonight's flood levels, crew assignments, what-if flow scenarios, or the Area Manager's winter flood-defence ranking.</div>
-      </div>
-      <form class="chat-form" onsubmit="sendQuestion(event)">
-        <input id="qInput" type="text" placeholder="Ask River Watch a question…" required />
-        <button id="askBtn" class="primary" type="submit">Ask</button>
-      </form>
-    </div>
-
-    <!-- 2. MOBILE CREWS -->
-    <div class="grid" id="crewCards"></div>
-
-    <!-- 3. TOWN-BY-TOWN LIVE ASSESSMENT -->
-    <div class="card">
-      <h2>2. Tonight's Town-by-Town Assessment (Live)</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Town (River / OPW ID)</th>
-              <th>Peak Flow (m³/s)</th>
-              <th>P95 / P99</th>
-              <th>Rain Warning (48h)</th>
-              <th>Level &amp; Action</th>
-              <th>Resources &amp; Notes</th>
-              <th>Working / Provenance</th>
-            </tr>
-          </thead>
-          <tbody id="townTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 4. AREA MANAGER STUDY (RULE 8) -->
-    <div class="card">
-      <h2>3. Area Manager Flood-Defence Study (Rule 8: Winters 2016/17 to 2024/25)</h2>
-      <p id="areaSummaryText" style="margin-top:0;"></p>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Town</th>
-              <th>Total Events (9 Winters)</th>
-              <th>First 4 Winters (16/17–19/20)</th>
-              <th>Last 4 Winters (21/22–24/25)</th>
-              <th>Last 4 &gt; First 4?</th>
-              <th>By Winter (1 Oct – 31 Mar)</th>
-            </tr>
-          </thead>
-          <tbody id="areaTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 5. RIVER VERIFICATION & SOURCES (TASK 1) -->
-    <div class="card">
-      <h2>4. OPW Station Coordinates &amp; Open-Meteo GloFAS Verification (Task 1 · 2016–2025)</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Town</th>
-              <th>OPW Station</th>
-              <th>OPW Lat, Lon</th>
-              <th>GloFAS Grid Lat, Lon</th>
-              <th>N Days</th>
-              <th>10-Yr Mean</th>
-              <th>Median</th>
-              <th>P95</th>
-              <th>P99</th>
-              <th>10-Yr Max</th>
-            </tr>
-          </thead>
-          <tbody id="auditTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <p class="disclaimer">
-      <strong>Decision Notice:</strong> River Watch recommends based on live public data and your Team Sheet; it never sends a crew.
-      AI can make mistakes; a person (the Duty Officer) makes the final decision by 16:00. Coastal/tidal flooding, road closures, insurance, and individual homes are out of scope (contact the council's area office).
-    </p>
-  </div>
-
-  <script>
-    const APPS_SCRIPT_URL = "PASTE_YOUR_CURRENT_EXEC_URL_HERE";
-    let currentState = null;
-    const chatHistory = [];
-
-    async function loadLiveState(rebuildHistory) {
-      const btn = document.getElementById("refreshBtn");
-      const banner = document.getElementById("statusBanner");
-      btn.disabled = true;
-      banner.textContent = rebuildHistory
-        ? "Rebuilding 10-year Open-Meteo history summary and refreshing live feeds…"
-        : "Fetching live Team Sheet, Open-Meteo 3-day forecasts, and Met Éireann warnings…";
-
-      try {
-        const action = rebuildHistory ? "rebuildHistory" : "state";
-        const resp = await fetch(APPS_SCRIPT_URL + "?action=" + action + "&t=" + Date.now());
-        const data = await resp.json();
-        if (!data.ok) throw new Error(data.error || "Unknown server error");
-        if (!data.state || !data.state.warnings_feed) {
-          throw new Error("Server did not return expected state. Received: " + JSON.stringify(data).slice(0, 200));
-        }
-        currentState = data.state;
-        renderState(currentState);
-      } catch (err) {
-        banner.textContent = "Error loading live data: " + err.message;
-      } finally {
-        btn.disabled = false;
-      }
-    }
-
-    function renderState(s) {
-      const banner = document.getElementById("statusBanner");
-      const warnStatus = s.warnings_feed.ok
-        ? (s.warnings_feed.active_rain_warnings_48h.length + " active rain warning(s) in Ireland (next 48h)")
-        : ("Met Éireann feed unavailable: " + s.warnings_feed.error);
-      banner.textContent = "Live data loaded at " + new Date(s.fetched_at).toLocaleString() + " · " + warnStatus;
-
-      const rehBanner = document.getElementById("rehearsalBanner");
-      if (s.rehearsal_active) {
-        rehBanner.classList.remove("hidden");
-        rehBanner.textContent = "REHEARSAL MODE ACTIVE: One or more towns are using flow_override_m3s or warning_override from the Team Sheet.";
-      } else {
-        rehBanner.classList.add("hidden");
-      }
-
-      document.getElementById("crewCards").innerHTML = s.crews.map(c => `
-        <div class="card" style="margin-bottom:0;">
-          <h3 style="margin:0 0 0.35rem;font-size:1rem;">${esc(c.name)} (max ${c.max})</h3>
-          <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.4rem;">
-            Area tonight: ${c.allowed.join(", ")}<br/>
-            ${c.restriction && c.restriction !== "None" ? "<strong style='color:#9a5b00;'>Restriction: " + esc(c.restriction) + "</strong>" : ""}
-          </div>
-          <div><strong>Assigned tonight:</strong> ${c.assigned.length ? esc(c.assigned.join(", ")) : "None"}</div>
-        </div>
-      `).join("");
-
-      document.getElementById("townTableBody").innerHTML = s.towns.map(t => `
-        <tr>
-          <td>
-            <strong>${esc(t.town)}</strong><br/>
-            <span style="font-size:0.8rem;color:var(--muted);">${esc(t.river)} · OPW ${esc(t.station_id)}</span><br/>
-            <span style="font-size:0.78rem;color:var(--muted);">Counties: ${esc(t.counties_monitored.join(" & "))}</span>
-          </td>
-          <td>
-            <strong>${t.effective_peak_m3s}</strong> m³/s<br/>
-            <span style="font-size:0.78rem;color:var(--muted);">3-day: ${t.forecast_daily_m3s.join(", ")}</span>
-            ${t.rehearsal_flow_used ? "<br/><span class='tag reh'>REHEARSAL FLOW</span>" : ""}
-          </td>
-          <td>P95: ${t.p95_m3s}<br/>P99: ${t.p99_m3s}<br/><span style="font-size:0.78rem;color:var(--muted);">(${t.pct_above_p99 >= 0 ? "+" : ""}${t.pct_above_p99}% vs P99)</span></td>
-          <td>
-            ${t.effective_rain_warning === "none" ? "None" : "<strong>" + esc(t.effective_rain_warning.toUpperCase()) + "</strong>"}
-            ${t.rehearsal_warning_used ? "<br/><span class='tag reh'>REHEARSAL WARN</span>" : ""}
-          </td>
-          <td>
-            <span class="pill ${esc(t.final_level)}">${esc(t.final_level)}</span><br/>
-            <span style="font-size:0.82rem;">${esc(t.operational_status)}</span>
-            ${t.flagged_to_area_manager ? "<br/><span class='tag flag'>FLAG AREA MANAGER</span>" : ""}
-          </td>
-          <td style="font-size:0.8rem;">
-            Sets: ${t.barrier_sets} · Pumps: ${t.pumps}<br/>
-            Sandbags: ${t.sandbags} · Staff: ${t.staff_on_call}<br/>
-            <span style="color:var(--muted);">${esc(t.notes)}</span>
-          </td>
-          <td style="font-size:0.78rem;color:var(--muted);">${esc(t.reason)}<br/>Source: ${esc(t.peak_source)}</td>
-        </tr>
-      `).join("");
-
-      const am = s.area_manager_study;
-      document.getElementById("areaSummaryText").innerHTML =
-        "<strong>First in line:</strong> " + esc(am.top_town.town) + " (" + am.top_town.total_events + " events). " +
-        "Last 4 winters (" + am.top_town.last_4_winters_events + ") vs First 4 winters (" + am.top_town.first_4_winters_events + "): <strong>" +
-        (am.top_town.last_4_more_than_first_4 ? "YES, increased" : "NO, did not exceed") + "</strong>.<br/>" +
-        "<span style='color:var(--muted);font-size:0.88rem;'>Limitation: " + esc(am.limitation) + "</span>";
-
-      document.getElementById("areaTableBody").innerHTML = am.ranking.map(r => `
-        <tr>
-          <td><strong>${esc(r.town)}</strong></td>
-          <td><strong>${r.total_events}</strong></td>
-          <td>${r.first_4_winters_events}</td>
-          <td>${r.last_4_winters_events}</td>
-          <td>${r.last_4_more_than_first_4 ? "Yes" : "No"}</td>
-          <td style="font-size:0.78rem;">${Object.entries(r.winter_events).map(([w, n]) => w + ": " + n).join(" · ")}</td>
-        </tr>
-      `).join("");
-
-      document.getElementById("auditTableBody").innerHTML = Object.values(s.history_summary.towns).map(h => `
-        <tr>
-          <td><strong>${esc(h.town)}</strong></td>
-          <td>${esc(h.station_id)} (${esc(h.station_name)})</td>
-          <td>${h.opw_lat}, ${h.opw_lon}</td>
-          <td>${h.glofas_lat}, ${h.glofas_lon}</td>
-          <td>${h.n_days}</td>
-          <td>${h.mean_m3s}</td>
-          <td>${h.median_m3s}</td>
-          <td>${h.p95_m3s}</td>
-          <td>${h.p99_m3s}</td>
-          <td>${h.max_m3s}</td>
-        </tr>
-      `).join("");
-    }
-
-    function askQuick(q) {
-      document.getElementById("qInput").value = q;
-      sendQuestion(new Event("submit"));
-    }
-
-    async function sendQuestion(e) {
-      e.preventDefault();
-      const input = document.getElementById("qInput");
-      const btn = document.getElementById("askBtn");
-      const q = input.value.trim();
-      if (!q) return;
-
-      appendMsg("user", q);
-      input.value = "";
-      btn.disabled = true;
-      const thinkingEl = appendMsg("assistant", "Reading live Sheet, forecasts, and warnings and thinking…");
-
-      try {
-        const resp = await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ question: q, history: chatHistory })
-        });
-        const data = await resp.json();
-        if (!data.ok) throw new Error(data.error || "Request failed");
-
-        thinkingEl.textContent = data.answer;
-        chatHistory.push({ role: "user", text: q }, { role: "assistant", text: data.answer });
-
-        if (data.state) {
-          currentState = data.state;
-          renderState(currentState);
-        }
-      } catch (err) {
-        thinkingEl.textContent = "Error: " + err.message;
-      } finally {
-        btn.disabled = false;
-      }
-    }
-
-    function appendMsg(role, text) {
-      const box = document.getElementById("chatBox");
-      const div = document.createElement("div");
-      div.className = "msg " + role;
-      div.textContent = text;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-      return div;
-    }
-
-    function downloadHistoryJson() {
-      if (!currentState || !currentState.history_summary) {
-        alert("Wait for live data to finish loading first.");
-        return;
-      }
-      const blob = new Blob([JSON.stringify(currentState.history_summary, null, 2)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "history_summary.json";
-      a.click();
-    }
-
-    function esc(s) {
-      return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-    }
-
-    loadLiveState(false);
-  </script>
-</body>
-</html>
+  <section class="card">
+    <h2>Ask River Watch</h2>
+    <div id="chat" aria-live="polite"></div>
+    <div class="chips" id="ex" style="margin-bottom:8px"></div>
+    <div class="ask">
