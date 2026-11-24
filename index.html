@@ -17,20 +17,20 @@
     header { background: var(--accent); color: #fff; padding: 1rem 1.25rem; }
     header h1 { margin: 0; font-size: 1.35rem; }
     header p { margin: 0.25rem 0 0; font-size: 0.9rem; opacity: 0.9; }
-    .container { max-width: 1200px; margin: 1rem auto; padding: 0 1rem 2rem; }
+    .container { max-width: 1240px; margin: 1rem auto; padding: 0 1rem 2rem; }
     .bar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    button { cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--ink); padding: 0.5rem 0.85rem; border-radius: 6px; font-weight: 600; font-size: 0.88rem; }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    button { cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--ink); padding: 0.5rem 0.85rem; border-radius: 6px; font-weight: 600; font-size: 0.86rem; }
     button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    button.active { background: #1d3557; color: #fff; border-color: #1d3557; }
     button:disabled { opacity: 0.55; cursor: not-allowed; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    .card h2 { margin: 0 0 0.7rem; font-size: 1.08rem; }
     .banner { padding: 0.65rem 0.9rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 1rem; border: 1px solid; }
     .banner.warn { background: #fff7e0; border-color: #f0c36d; color: #704700; }
     .banner.info { background: #e8f1fb; border-color: #b4d2f2; color: #124375; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.85rem; margin-bottom: 1rem; }
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
     th, td { text-align: left; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
     th { background: #f8fafc; font-weight: 700; color: var(--muted); white-space: nowrap; }
     .pill { display: inline-block; padding: 0.18rem 0.55rem; border-radius: 999px; font-weight: 700; font-size: 0.78rem; }
@@ -40,8 +40,8 @@
     .tag { display: inline-block; font-size: 0.74rem; padding: 0.1rem 0.45rem; border-radius: 4px; background: #eef2f6; color: #334155; margin: 0.1rem 0.2rem 0 0; }
     .tag.reh { background: #fde68a; color: #78350f; font-weight: 700; }
     .tag.flag { background: #fecaca; color: #7f1d1d; font-weight: 700; }
-    .chat-box { max-height: 360px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; background: #fafbfd; margin-bottom: 0.75rem; }
-    .msg { margin-bottom: 0.75rem; padding: 0.65rem 0.8rem; border-radius: 6px; white-space: pre-wrap; font-size: 0.92rem; }
+    .chat-box { max-height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; background: #fafbfd; margin-bottom: 0.75rem; }
+    .msg { margin-bottom: 0.75rem; padding: 0.65rem 0.8rem; border-radius: 6px; white-space: pre-wrap; font-size: 0.91rem; }
     .msg.user { background: #e8f1fb; margin-left: 12%; }
     .msg.assistant { background: #ffffff; border: 1px solid var(--border); margin-right: 6%; }
     .chat-form { display: flex; gap: 0.5rem; }
@@ -54,120 +54,110 @@
 </head>
 <body>
   <header>
-    <h1>River Watch — Eight-Town Flood Response Decision Support</h1>
+    <h1>River Watch — Eight-Town Flood Response Dashboard</h1>
     <p>Live Google Sheet · Open-Meteo GloFAS Forecast &amp; 10-Yr History · OPW Station Network · Met Éireann Warnings · Gemini 3.5 Flash-Lite</p>
   </header>
 
   <div class="container">
     <div class="bar">
-      <div class="tabs">
-        <button id="tabBtnPlan" class="active" onclick="showTab('plan')">Tonight's Plan &amp; AI</button>
-        <button id="tabBtnArea" onclick="showTab('area')">Area Manager Study (Rule 8)</button>
-        <button id="tabBtnAudit" onclick="showTab('audit')">River Check &amp; Sources (Task 1)</button>
+      <div style="font-size:0.88rem;color:var(--muted);">
+        All panels update live from your Team Sheet &amp; public feeds.
       </div>
-      <div class="tabs">
-        <button id="refreshBtn" onclick="loadLiveState(false)">Refresh Live Data</button>
+      <div class="actions">
+        <button id="refreshBtn" class="primary" onclick="loadLiveState(false)">Refresh Live Data</button>
         <button onclick="downloadHistoryJson()">Download history_summary.json</button>
+        <button onclick="loadLiveState(true)">Rebuild 10-Yr Cache</button>
       </div>
     </div>
 
     <div id="statusBanner" class="banner info">Loading live Google Sheet, river forecasts, and Met Éireann warnings…</div>
     <div id="rehearsalBanner" class="banner warn hidden"></div>
 
-    <!-- TAB 1: TONIGHT'S PLAN & AI -->
-    <div id="tabPlan">
-      <div class="card">
-        <h2 style="margin-top:0;font-size:1.1rem;">Duty Officer &amp; Area Manager AI Assistant</h2>
-        <div class="quick-qs">
-          <button onclick="askQuick(&quot;What is tonight's plan?&quot;)">What is tonight's plan?</button>
-          <button onclick="askQuick('Why is Fermoy at that level?')">Why is Fermoy at that level?</button>
-          <button onclick="askQuick('What if the Suir at Clonmel reaches 150 m3/s?')">What if Suir at Clonmel reaches 150 m³/s?</button>
-          <button onclick="askQuick('Which town should be first in line for a flood-defence study?')">First in line for study?</button>
-          <button onclick="askQuick('Will my house in Mallow flood tonight?')">Will my house in Mallow flood?</button>
-        </div>
-        <div id="chatBox" class="chat-box">
-          <div class="msg assistant">Ask about tonight's flood levels, crew assignments, what-if flow scenarios, or the Area Manager's winter flood-defence ranking.</div>
-        </div>
-        <form class="chat-form" onsubmit="sendQuestion(event)">
-          <input id="qInput" type="text" placeholder="Ask River Watch a question…" required />
-          <button id="askBtn" class="primary" type="submit">Ask</button>
-        </form>
+    <!-- 1. AI ASSISTANT -->
+    <div class="card">
+      <h2>1. Duty Officer &amp; Area Manager AI Assistant</h2>
+      <div class="quick-qs">
+        <button onclick="askQuick(&quot;What is tonight's plan?&quot;)">What is tonight's plan?</button>
+        <button onclick="askQuick('Why is Fermoy at that level?')">Why is Fermoy at that level?</button>
+        <button onclick="askQuick('What if the Suir at Clonmel reaches 150 m3/s?')">What if Suir at Clonmel reaches 150 m³/s?</button>
+        <button onclick="askQuick('Which town should be first in line for a flood-defence study?')">First in line for study?</button>
+        <button onclick="askQuick('Will my house in Mallow flood tonight?')">Will my house in Mallow flood?</button>
       </div>
+      <div id="chatBox" class="chat-box">
+        <div class="msg assistant">Ask about tonight's flood levels, crew assignments, what-if flow scenarios, or the Area Manager's winter flood-defence ranking.</div>
+      </div>
+      <form class="chat-form" onsubmit="sendQuestion(event)">
+        <input id="qInput" type="text" placeholder="Ask River Watch a question…" required />
+        <button id="askBtn" class="primary" type="submit">Ask</button>
+      </form>
+    </div>
 
-      <div class="grid" id="crewCards"></div>
+    <!-- 2. MOBILE CREWS -->
+    <div class="grid" id="crewCards"></div>
 
-      <div class="card">
-        <h2 style="margin-top:0;font-size:1.1rem;">Town-by-Town Assessment (Live)</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Town (River / OPW ID)</th>
-                <th>Peak Flow (m³/s)</th>
-                <th>P95 / P99</th>
-                <th>Rain Warning (48h)</th>
-                <th>Level &amp; Action</th>
-                <th>Resources &amp; Notes</th>
-                <th>Working / Provenance</th>
-              </tr>
-            </thead>
-            <tbody id="townTableBody"></tbody>
-          </table>
-        </div>
+    <!-- 3. TOWN-BY-TOWN LIVE ASSESSMENT -->
+    <div class="card">
+      <h2>2. Tonight's Town-by-Town Assessment (Live)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Town (River / OPW ID)</th>
+              <th>Peak Flow (m³/s)</th>
+              <th>P95 / P99</th>
+              <th>Rain Warning (48h)</th>
+              <th>Level &amp; Action</th>
+              <th>Resources &amp; Notes</th>
+              <th>Working / Provenance</th>
+            </tr>
+          </thead>
+          <tbody id="townTableBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- TAB 2: AREA MANAGER STUDY -->
-    <div id="tabArea" class="hidden">
-      <div class="card">
-        <h2 style="margin-top:0;font-size:1.1rem;">Winter High-Flow Events (1 Oct – 31 Mar, 2016/17 to 2024/25)</h2>
-        <p id="areaSummaryText"></p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Town</th>
-                <th>Total Events (9 Winters)</th>
-                <th>First 4 Winters (16/17–19/20)</th>
-                <th>Last 4 Winters (21/22–24/25)</th>
-                <th>Trend (Last 4 &gt; First 4?)</th>
-                <th>By Winter</th>
-              </tr>
-            </thead>
-            <tbody id="areaTableBody"></tbody>
-          </table>
-        </div>
+    <!-- 4. AREA MANAGER STUDY (RULE 8) -->
+    <div class="card">
+      <h2>3. Area Manager Flood-Defence Study (Rule 8: Winters 2016/17 to 2024/25)</h2>
+      <p id="areaSummaryText" style="margin-top:0;"></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Town</th>
+              <th>Total Events (9 Winters)</th>
+              <th>First 4 Winters (16/17–19/20)</th>
+              <th>Last 4 Winters (21/22–24/25)</th>
+              <th>Last 4 &gt; First 4?</th>
+              <th>By Winter (1 Oct – 31 Mar)</th>
+            </tr>
+          </thead>
+          <tbody id="areaTableBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- TAB 3: RIVER VERIFICATION & SOURCES -->
-    <div id="tabAudit" class="hidden">
-      <div class="card">
-        <h2 style="margin-top:0;font-size:1.1rem;">OPW Station Coordinates &amp; Open-Meteo GloFAS Verification</h2>
-        <p style="font-size:0.88rem;color:var(--muted);">
-          Use this table to verify each town's flow belongs to its named river (for Task 1 &amp; hand-check arithmetic).
-          History period: <strong>2016-01-01 to 2025-12-31</strong>.
-          <button style="margin-left:0.5rem;" onclick="loadLiveState(true)">Force Rebuild 10-Yr Cache</button>
-        </p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Town</th>
-                <th>OPW Station</th>
-                <th>OPW Lat, Lon</th>
-                <th>GloFAS Grid Lat, Lon</th>
-                <th>N Days</th>
-                <th>10-Yr Mean</th>
-                <th>Median</th>
-                <th>P95</th>
-                <th>P99</th>
-                <th>10-Yr Max</th>
-              </tr>
-            </thead>
-            <tbody id="auditTableBody"></tbody>
-          </table>
-        </div>
+    <!-- 5. RIVER VERIFICATION & SOURCES (TASK 1) -->
+    <div class="card">
+      <h2>4. OPW Station Coordinates &amp; Open-Meteo GloFAS Verification (Task 1 · 2016–2025)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Town</th>
+              <th>OPW Station</th>
+              <th>OPW Lat, Lon</th>
+              <th>GloFAS Grid Lat, Lon</th>
+              <th>N Days</th>
+              <th>10-Yr Mean</th>
+              <th>Median</th>
+              <th>P95</th>
+              <th>P99</th>
+              <th>10-Yr Max</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -178,18 +168,9 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxhZgiKFOP4KkZstS8sv9PTveuRotYAvdT1LHc2QtwxCxh-DV0mDa3BhrXPR1CVnq7rLg/exec";
+    const APPS_SCRIPT_URL = "PASTE_YOUR_CURRENT_EXEC_URL_HERE";
     let currentState = null;
     const chatHistory = [];
-
-    function showTab(tab) {
-      document.getElementById("tabPlan").classList.toggle("hidden", tab !== "plan");
-      document.getElementById("tabArea").classList.toggle("hidden", tab !== "area");
-      document.getElementById("tabAudit").classList.toggle("hidden", tab !== "audit");
-      document.getElementById("tabBtnPlan").classList.toggle("active", tab === "plan");
-      document.getElementById("tabBtnArea").classList.toggle("active", tab === "area");
-      document.getElementById("tabBtnAudit").classList.toggle("active", tab === "audit");
-    }
 
     async function loadLiveState(rebuildHistory) {
       const btn = document.getElementById("refreshBtn");
@@ -204,6 +185,9 @@
         const resp = await fetch(APPS_SCRIPT_URL + "?action=" + action + "&t=" + Date.now());
         const data = await resp.json();
         if (!data.ok) throw new Error(data.error || "Unknown server error");
+        if (!data.state || !data.state.warnings_feed) {
+          throw new Error("Server did not return expected state. Received: " + JSON.stringify(data).slice(0, 200));
+        }
         currentState = data.state;
         renderState(currentState);
       } catch (err) {
@@ -228,9 +212,7 @@
         rehBanner.classList.add("hidden");
       }
 
-      // Crew Cards
-      const crewEl = document.getElementById("crewCards");
-      crewEl.innerHTML = s.crews.map(c => `
+      document.getElementById("crewCards").innerHTML = s.crews.map(c => `
         <div class="card" style="margin-bottom:0;">
           <h3 style="margin:0 0 0.35rem;font-size:1rem;">${esc(c.name)} (max ${c.max})</h3>
           <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.4rem;">
@@ -241,9 +223,7 @@
         </div>
       `).join("");
 
-      // Town Table
-      const tbody = document.getElementById("townTableBody");
-      tbody.innerHTML = s.towns.map(t => `
+      document.getElementById("townTableBody").innerHTML = s.towns.map(t => `
         <tr>
           <td>
             <strong>${esc(t.town)}</strong><br/>
@@ -274,7 +254,6 @@
         </tr>
       `).join("");
 
-      // Area Manager Table
       const am = s.area_manager_study;
       document.getElementById("areaSummaryText").innerHTML =
         "<strong>First in line:</strong> " + esc(am.top_town.town) + " (" + am.top_town.total_events + " events). " +
@@ -293,9 +272,7 @@
         </tr>
       `).join("");
 
-      // Audit Table
-      const townsHist = Object.values(s.history_summary.towns);
-      document.getElementById("auditTableBody").innerHTML = townsHist.map(h => `
+      document.getElementById("auditTableBody").innerHTML = Object.values(s.history_summary.towns).map(h => `
         <tr>
           <td><strong>${esc(h.town)}</strong></td>
           <td>${esc(h.station_id)} (${esc(h.station_name)})</td>
