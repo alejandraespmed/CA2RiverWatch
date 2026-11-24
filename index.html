@@ -163,7 +163,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = "PASTE_YOUR_CURRENT_EXEC_URL_HERE";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7-qCN1pfS7wlcv43rNSO06873zJOtLcGpa4VghJV3O70UpSPWObBm9uQqvQD1OvF6dg/exec";
     let currentState = null;
     const chatHistory = [];
 
@@ -239,7 +239,7 @@
           </td>
           <td>
             <strong>${t.effective_peak_m3s}</strong> m³/s<br/>
-            <span style="font-size:0.78rem;color:var(--muted);">3-day: ${t.forecast_daily_m3s.join(", ")}</span>
+            <span style="font-size:0.78rem;color:var(--muted);">3-day (${esc(t.forecast_dates.join(", "))}): ${t.forecast_daily_m3s.join(", ")}</span>
             ${t.rehearsal_flow_used ? "<br/><span class='tag reh'>REHEARSAL FLOW</span>" : ""}
           </td>
           <td>P95: ${t.p95_m3s}<br/>P99: ${t.p99_m3s}<br/><span style="font-size:0.78rem;color:var(--muted);">(${t.pct_above_p99 >= 0 ? "+" : ""}${t.pct_above_p99}% vs P99)</span></td>
@@ -297,11 +297,11 @@
 
     function askQuick(q) {
       document.getElementById("qInput").value = q;
-      sendQuestion(new Event("submit"));
+      sendQuestion(null);
     }
 
     async function sendQuestion(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       const input = document.getElementById("qInput");
       const btn = document.getElementById("askBtn");
       const q = input.value.trim();
