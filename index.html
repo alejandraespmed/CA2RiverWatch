@@ -40,10 +40,10 @@
     .tag { display: inline-block; font-size: 0.74rem; padding: 0.1rem 0.45rem; border-radius: 4px; background: #eef2f6; color: #334155; margin: 0.1rem 0.2rem 0 0; }
     .tag.reh { background: #fde68a; color: #78350f; font-weight: 700; }
     .tag.flag { background: #fecaca; color: #7f1d1d; font-weight: 700; }
-    .chat-box { max-height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; background: #fafbfd; margin-bottom: 0.75rem; }
-    .msg { margin-bottom: 0.75rem; padding: 0.65rem 0.8rem; border-radius: 6px; white-space: pre-wrap; font-size: 0.91rem; }
+    .chat-box { max-height: 460px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; background: #fafbfd; margin-bottom: 0.75rem; }
+    .msg { margin-bottom: 0.75rem; padding: 0.65rem 0.85rem; border-radius: 6px; white-space: pre-wrap; font-size: 0.92rem; line-height: 1.5; }
     .msg.user { background: #e8f1fb; margin-left: 12%; }
-    .msg.assistant { background: #ffffff; border: 1px solid var(--border); margin-right: 6%; }
+    .msg.assistant { background: #ffffff; border: 1px solid var(--border); margin-right: 4%; }
     .chat-form { display: flex; gap: 0.5rem; }
     .chat-form input { flex: 1; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
     .quick-qs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
@@ -163,7 +163,7 @@
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7-qCN1pfS7wlcv43rNSO06873zJOtLcGpa4VghJV3O70UpSPWObBm9uQqvQD1OvF6dg/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyW8HNadCPD5N7yyJ7Zp68Bg2G_XiVdHV2MutYD99v8ke_Xn3jt6PQc2oGhgaUVxmfcDg/exec";
     let currentState = null;
     const chatHistory = [];
 
@@ -320,7 +320,7 @@
         });
         if (!data.ok) throw new Error(data.error || "Request failed");
 
-        thinkingEl.textContent = data.answer;
+        thinkingEl.innerHTML = formatAnswerHtml(data.answer);
         chatHistory.push({ role: "user", text: q }, { role: "assistant", text: data.answer });
 
         if (data.state) {
@@ -354,6 +354,15 @@
       a.href = URL.createObjectURL(blob);
       a.download = "history_summary.json";
       a.click();
+    }
+
+    function formatAnswerHtml(text) {
+      return esc(text)
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/^#{1,4}\s*(.+)$/gm, "<strong>$1</strong>")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/^---\s*$/gm, "<hr style='border:0;border-top:1px solid #dce3ec;margin:0.5rem 0;'>")
+        .replace(/^[\*\-]\s+/gm, "• ");
     }
 
     function esc(s) {
