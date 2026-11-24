@@ -1,0 +1,52 @@
+import json, urllib.request
+
+STATIONS = {
+    "Athlone": "0000026027",
+    "Ennis (Ballycorey)": "0000027002",
+    "Bandon": "0000020001",
+    "Carrick-on-Shannon": "0000026324",
+    "Clonmel": "0000016011",
+    "Enniscorthy": "0000012002",
+    "Fermoy": "0000018107",
+    "Mallow": "0000018056",
+}
+
+def fetch_json(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "RiverWatchCheck/1.0"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+def percentile(sorted_vals, p):
+    k = (len(sorted_vals) - 1) * (p / 100.0)
+    f = int(k)
+    c = min(f + 1, len(sorted_vals) - 1)
+    return sorted_vals[f] + (k - f) * (sorted_vals[c] - sorted_vals[f])
+
+print("Fetching OPW GeoJSON...")
+opw = fetch_json("https://waterlevel.ie/geojson/")
+by_ref = {}
+for feat in opw["features"]:
+    props = feat["properties"]
+    ref = str(props.get("station_ref", "")).strip()
+    by_ref[ref] = (props.get("station_name"), feat["geometry"]["coordinates"])  # [lon, lat]
+
+print(f"{'Town':<20} {'OPW_Lat':>8} {'OPW_Lon':>8} {'GridLat':>8} {'GridLon':>8} {'Mean':>7} {'Med':>7} {'P95':>7} {'P99':>7} {'Max':>7}")
+for town, ref in STATIONS.items():
+    # Match either 10-char padded ref or short numeric id
+    match = by_ref.get(ref) or by_ref.get(ref.lstrip("0"))
+    if not match:
+        print(f"{town:<20} NOT FOUND in waterlevel.ie/geojson")
+        continue
+    name, (lon, lat) = match
+    url = (
+        f"https://flood-api.open-meteo.com/v1/flood"
+        f"?latitude={lat}&longitude={lon}"
+        f"&daily=river_discharge&start_date=2016-01-01&end_date=2025-12-31"
+    )
+    om = fetch_json(url)
+    vals = sorted(v for v in om["daily"]["river_discharge"] if v is not None)
+    mean_v = sum(vals) / len(vals)
+    med_v = percentile(vals, 50)
+    p95 = percentile(vals, 95)
+    p99 = percentile(vals, 99)
+    print(f"{town:<20} {lat:8.4f} {lon:8.4f} {om['latitude']:8.4f} {om['longitude']:8.4f} {mean_v:7.2f} {med_v:7.2f} {p95:7.2f} {p99:7.2f} {vals[-1]:7.2f}")
